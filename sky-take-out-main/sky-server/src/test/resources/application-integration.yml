@@ -1,0 +1,46 @@
+# 集成测试专用配置
+# 使用方式: @SpringBootTest + @ActiveProfiles("integration")
+# 连接 Docker Compose 启动的 MySQL + Redis（各自本地 localhost）
+
+server:
+  port: 8080
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3307/sky_take_out?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    username: sky_test
+    password: sky_test_123
+    type: com.alibaba.druid.pool.DruidDataSource
+  data:
+    redis:
+      host: localhost
+      port: 6380
+      password: sky_test_123
+      timeout: 3000ms
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.sky.entity
+  configuration:
+    map-underscore-to-camel-case: true
+
+logging:
+  level:
+    com:
+      sky:
+        mapper: debug
+        service: info
+        controller: info
+
+sky:
+  jwt:
+    admin-secret-key: itcast
+    admin-ttl: 7200000
+    admin-token-name: token
+    user-secret-key: itcast
+    user-ttl: 7200000
+    user-token-name: authentication
+  wechat:
+    appid: test-appid
+    secret: test-secret
