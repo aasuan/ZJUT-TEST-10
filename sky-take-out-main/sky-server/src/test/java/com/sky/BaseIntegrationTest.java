@@ -17,6 +17,11 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @ActiveProfiles("integration")
+@org.springframework.test.context.TestPropertySource(properties = {
+        "spring.profiles.active=integration",
+        "spring.profiles.include=",
+        "spring.sql.init.mode=never"
+})
 public abstract class BaseIntegrationTest {
 
     @Autowired
