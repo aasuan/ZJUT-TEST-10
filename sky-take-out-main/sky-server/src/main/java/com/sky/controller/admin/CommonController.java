@@ -26,15 +26,18 @@ public class CommonController {
     @PostMapping("/upload")
     public Result<String> upload(MultipartFile file) {
         log.info("上传图片：{}", file);
+        if (file == null) {
+            return Result.error("文件不能为空");
+        }
         String originalFilename = file.getOriginalFilename();
         String suffix = ".jpg";
-        if (originalFilename != null) {
+        if (originalFilename != null && !originalFilename.isEmpty()) {
             suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
         }
         String fileName = UUID.randomUUID().toString() + suffix;
         String imgUrl = "http://localhost/media/" + fileName;
         try {
-            file.transferTo(new java.io.File("D:\\Variable\\nginx-1.24.0\\media\\" + fileName));
+            file.transferTo(new java.io.File("C:\\Variable\\nginx-1.30.1\\media\\" + fileName));//此处为自己的路径，不用合并!!!
             return Result.success(imgUrl);
         } catch (IllegalStateException | IOException e) {
             log.error("上传图片失败：{}", e);
