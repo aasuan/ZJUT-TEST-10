@@ -24,6 +24,7 @@
         <java.version>17</java.version>
 
         <mybatis.spring>3.0.2</mybatis.spring>
+        <mybatis.test>3.0.2</mybatis.test>
         <lombok>1.18.28</lombok>
         <fastjson>1.2.76</fastjson>
         <commons.lang>2.6</commons.lang>
@@ -43,6 +44,12 @@
             <dependency>
                 <groupId>org.mybatis.spring.boot</groupId>
                 <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis.spring}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter-test</artifactId>
                 <version>${mybatis.spring}</version>
             </dependency>
 
@@ -128,6 +135,12 @@
                 <groupId>com.github.wechatpay-apiv3</groupId>
                 <artifactId>wechatpay-apache-httpclient</artifactId>
                 <version>0.4.9</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>2.2.224</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

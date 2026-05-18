@@ -1,0 +1,1484 @@
+{
+	"info": {
+		"_postman_id": "sky-take-out-api-v1",
+		"name": "Sky-Take-Out API",
+		"description": "苍穹外卖项目完整 API 集合\n\n## 使用说明\n1. 先执行 Admin > Employee > Login 获取 adminToken\n2. 先执行 User > Auth > WeChat Login 获取 userToken\n3. Collection 级别 Pre-request Script 会自动在 adminToken 为空时尝试登录\n\n## 变量\n- baseUrl: 服务器地址，默认 http://localhost:8080\n- adminToken: Admin 端 JWT token（自动获取）\n- userToken: User 端 JWT token（需手动设置或通过登录获取）",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "adminToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userToken",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-login for admin endpoints if token is not set",
+					"const requestUrl = pm.request.url.toString();",
+					"const isAdmin = requestUrl.includes('/admin/');",
+					"const isLogin = requestUrl.includes('/admin/employee/login');",
+					"const token = pm.collectionVariables.get('adminToken');",
+					"",
+					"if (isAdmin && !isLogin && (!token || token === '')) {",
+					"    const baseUrl = pm.collectionVariables.get('baseUrl');",
+					"    console.log('Admin token not set, attempting auto-login...');",
+					"    pm.sendRequest({",
+					"        url: baseUrl + '/admin/employee/login',",
+					"        method: 'POST',",
+					"        header: {",
+					"            'Content-Type': 'application/json'",
+					"        },",
+					"        body: {",
+					"            mode: 'raw',",
+					"            raw: JSON.stringify({ username: 'admin', password: '123456' })",
+					"        }",
+					"    }, function (err, res) {",
+					"        if (!err && res) {",
+					"            const json = res.json();",
+					"            if (json.code === 1 && json.data && json.data.token) {",
+					"                pm.collectionVariables.set('adminToken', json.data.token);",
+					"                console.log('Admin token auto-acquired successfully');",
+					"            } else {",
+					"                console.warn('Auto-login failed, response:', json.msg || json);",
+					"            }",
+					"        } else {",
+					"            console.error('Auto-login request error:', err);",
+					"        }",
+					"    });",
+					"}"
+				]
+			}
+		}
+	],
+	"item": [
+		{
+			"name": "Admin",
+			"description": "管理端接口，需要 header: token",
+			"auth": {
+				"type": "apikey",
+				"apikey": [
+					{
+						"key": "key",
+						"value": "token",
+						"type": "string"
+					},
+					{
+						"key": "value",
+						"value": "{{adminToken}}",
+						"type": "string"
+					},
+					{
+						"key": "in",
+						"value": "header",
+						"type": "string"
+					}
+				]
+			},
+			"item": [
+				{
+					"name": "Employee",
+					"description": "员工管理 - /admin/employee",
+					"item": [
+						{
+							"name": "Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"if (pm.response.code === 200) {",
+											"    const response = pm.response.json();",
+											"    if (response.code === 1 && response.data && response.data.token) {",
+											"        pm.collectionVariables.set('adminToken', response.data.token);",
+											"        console.log('Admin token saved:', response.data.token);",
+											"    }",
+											"}"
+										]
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"123456\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/admin/employee/login",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "employee", "login"]
+								}
+							}
+						},
+						{
+							"name": "Logout",
+							"request": {
+								"method": "POST",
+								"url": {
+									"raw": "{{baseUrl}}/admin/employee/logout",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "employee", "logout"]
+								}
+							}
+						},
+						{
+							"name": "Add Employee",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"张三\",\n    \"username\": \"zhangsan\",\n    \"phone\": \"13800138000\",\n    \"sex\": \"1\",\n    \"idNumber\": \"110101199001011234\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/admin/employee",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "employee"]
+								}
+							}
+						},
+						{
+							"name": "Employee Page",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/admin/employee/page?name=&page=1&pageSize=10",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "employee", "page"],
+									"query": [
+										{"key": "name", "value": ""},
+										{"key": "page", "value": "1"},
+										{"key": "pageSize", "value": "10"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Enable/Disable Employee",
+							"request": {
+								"method": "POST",
+								"url": {
+									"raw": "{{baseUrl}}/admin/employee/status/1?id=1",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "employee", "status", "1"],
+									"query": [
+										{"key": "id", "value": "1"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Employee by ID",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/admin/employee/1",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "employee", "1"]
+								}
+							}
+						},
+						{
+							"name": "Update Employee",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": 1,\n    \"name\": \"张三\",\n    \"username\": \"zhangsan\",\n    \"phone\": \"13800138000\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/admin/employee",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "employee"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Category",
+					"description": "分类管理 - /admin/category",
+					"item": [
+						{
+							"name": "Add Category",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"type\": 1,\n    \"name\": \"热菜\",\n    \"sort\": 1\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/admin/category",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "category"]
+								}
+							}
+						},
+						{
+							"name": "Category Page",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/admin/category/page?page=1&pageSize=10",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "category", "page"],
+									"query": [
+										{"key": "page", "value": "1"},
+										{"key": "pageSize", "value": "10"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Delete Category",
+							"request": {
+								"method": "DELETE",
+								"url": {
+									"raw": "{{baseUrl}}/admin/category?id=1",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "category"],
+									"query": [
+										{"key": "id", "value": "1"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Update Category",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": 1,\n    \"name\": \"凉菜\",\n    \"sort\": 2\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/admin/category",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "category"]
+								}
+							}
+						},
+						{
+							"name": "Enable/Disable Category",
+							"request": {
+								"method": "POST",
+								"url": {
+									"raw": "{{baseUrl}}/admin/category/status/1?id=1",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "category", "status", "1"],
+									"query": [
+										{"key": "id", "value": "1"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Category List by Type",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/admin/category/list?type=1",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "category", "list"],
+									"query": [
+										{"key": "type", "value": "1"}
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Dish",
+					"description": "菜品管理 - /admin/dish",
+					"item": [
+						{
+							"name": "Add Dish",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"宫保鸡丁\",\n    \"categoryId\": 1,\n    \"price\": 38.00,\n    \"description\": \"经典川菜\",\n    \"status\": 1,\n    \"flavors\": [\n        {\n            \"name\": \"辣度\",\n            \"value\": \"[\\\"微辣\\\",\\\"中辣\\\",\\\"重辣\\\"]\"\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/admin/dish",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "dish"]
+								}
+							}
+						},
+						{
+							"name": "Dish Page",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/admin/dish/page?page=1&pageSize=10",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "dish", "page"],
+									"query": [
+										{"key": "page", "value": "1"},
+										{"key": "pageSize", "value": "10"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Batch Delete Dishes",
+							"request": {
+								"method": "DELETE",
+								"url": {
+									"raw": "{{baseUrl}}/admin/dish?ids=1,2",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "dish"],
+									"query": [
+										{"key": "ids", "value": "1,2"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Dish by ID",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/admin/dish/1",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "dish", "1"]
+								}
+							}
+						},
+						{
+							"name": "Update Dish",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": 1,\n    \"name\": \"宫保鸡丁（改良版）\",\n    \"categoryId\": 1,\n    \"price\": 42.00,\n    \"description\": \"经典川菜改良版\",\n    \"status\": 1,\n    \"flavors\": [\n        {\n            \"name\": \"辣度\",\n            \"value\": \"[\\\"微辣\\\",\\\"中辣\\\",\\\"重辣\\\"]\"\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/admin/dish",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "dish"]
+								}
+							}
+						},
+						{
+							"name": "Enable/Disable Dish",
+							"request": {
+								"method": "POST",
+								"url": {
+									"raw": "{{baseUrl}}/admin/dish/status/1?id=1",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "dish", "status", "1"],
+									"query": [
+										{"key": "id", "value": "1"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Dish List by Category",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/admin/dish/list?categoryId=1",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "dish", "list"],
+									"query": [
+										{"key": "categoryId", "value": "1"}
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Setmeal",
+					"description": "套餐管理 - /admin/setmeal",
+					"item": [
+						{
+							"name": "Add Setmeal",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"categoryId\": 1,\n    \"name\": \"商务套餐A\",\n    \"price\": 58.00,\n    \"description\": \"含主食+饮品\",\n    \"status\": 1,\n    \"setmealDishes\": [\n        {\n            \"dishId\": 1,\n            \"name\": \"宫保鸡丁\",\n            \"price\": 38.00,\n            \"copies\": 1\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/admin/setmeal",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "setmeal"]
+								}
+							}
+						},
+						{
+							"name": "Setmeal Page",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/admin/setmeal/page?page=1&pageSize=10",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "setmeal", "page"],
+									"query": [
+										{"key": "page", "value": "1"},
+										{"key": "pageSize", "value": "10"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Batch Delete Setmeals",
+							"request": {
+								"method": "DELETE",
+								"url": {
+									"raw": "{{baseUrl}}/admin/setmeal?ids=1,2",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "setmeal"],
+									"query": [
+										{"key": "ids", "value": "1,2"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Setmeal by ID",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/admin/setmeal/1",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "setmeal", "1"]
+								}
+							}
+						},
+						{
+							"name": "Update Setmeal",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": 1,\n    \"categoryId\": 1,\n    \"name\": \"商务套餐A（升级版）\",\n    \"price\": 68.00,\n    \"description\": \"含主食+饮品+甜点\",\n    \"status\": 1,\n    \"setmealDishes\": [\n        {\n            \"dishId\": 1,\n            \"name\": \"宫保鸡丁\",\n            \"price\": 38.00,\n            \"copies\": 1\n        },\n        {\n            \"dishId\": 2,\n            \"name\": \"糖醋里脊\",\n            \"price\": 45.00,\n            \"copies\": 1\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/admin/setmeal",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "setmeal"]
+								}
+							}
+						},
+						{
+							"name": "Enable/Disable Setmeal",
+							"request": {
+								"method": "POST",
+								"url": {
+									"raw": "{{baseUrl}}/admin/setmeal/status/1?id=1",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "setmeal", "status", "1"],
+									"query": [
+										{"key": "id", "value": "1"}
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Common",
+					"description": "通用接口 - /admin/common",
+					"item": [
+						{
+							"name": "File Upload",
+							"request": {
+								"method": "POST",
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": "",
+											"description": "选择要上传的图片文件"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{baseUrl}}/admin/common/upload",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "common", "upload"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Order",
+					"description": "订单管理（管理端） - /admin/order",
+					"item": [
+						{
+							"name": "Order Search",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/admin/order/conditionSearch?page=1&pageSize=10",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "order", "conditionSearch"],
+									"query": [
+										{"key": "page", "value": "1"},
+										{"key": "pageSize", "value": "10"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Order Statistics",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/admin/order/statistics",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "order", "statistics"]
+								}
+							}
+						},
+						{
+							"name": "Order Details",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/admin/order/details/1",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "order", "details", "1"]
+								}
+							}
+						},
+						{
+							"name": "Confirm Order",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": 1\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/admin/order/confirm",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "order", "confirm"]
+								}
+							}
+						},
+						{
+							"name": "Reject Order",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": 1,\n    \"rejectionReason\": \"门店太忙\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/admin/order/rejection",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "order", "rejection"]
+								}
+							}
+						},
+						{
+							"name": "Cancel Order",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": 1,\n    \"cancelReason\": \"客户要求取消\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/admin/order/cancel",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "order", "cancel"]
+								}
+							}
+						},
+						{
+							"name": "Delivery Order",
+							"request": {
+								"method": "PUT",
+								"url": {
+									"raw": "{{baseUrl}}/admin/order/delivery/1",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "order", "delivery", "1"]
+								}
+							}
+						},
+						{
+							"name": "Complete Order",
+							"request": {
+								"method": "PUT",
+								"url": {
+									"raw": "{{baseUrl}}/admin/order/complete/1",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "order", "complete", "1"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Shop",
+					"description": "店铺管理（管理端） - /admin/shop",
+					"item": [
+						{
+							"name": "Set Shop Status",
+							"request": {
+								"method": "PUT",
+								"url": {
+									"raw": "{{baseUrl}}/admin/shop/1",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "shop", "1"]
+								}
+							}
+						},
+						{
+							"name": "Get Shop Status",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/admin/shop/status",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "shop", "status"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Report",
+					"description": "报表统计 - /admin/report",
+					"item": [
+						{
+							"name": "Turnover Statistics",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/admin/report/turnoverStatistics?begin=2024-01-01&end=2024-01-31",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "report", "turnoverStatistics"],
+									"query": [
+										{"key": "begin", "value": "2024-01-01"},
+										{"key": "end", "value": "2024-01-31"}
+									]
+								}
+							}
+						},
+						{
+							"name": "User Statistics",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/admin/report/userStatistics?begin=2024-01-01&end=2024-01-31",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "report", "userStatistics"],
+									"query": [
+										{"key": "begin", "value": "2024-01-01"},
+										{"key": "end", "value": "2024-01-31"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Order Statistics",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/admin/report/ordersStatistics?begin=2024-01-01&end=2024-01-31",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "report", "ordersStatistics"],
+									"query": [
+										{"key": "begin", "value": "2024-01-01"},
+										{"key": "end", "value": "2024-01-31"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Top 10 Sales",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/admin/report/top10?begin=2024-01-01&end=2024-01-31",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "report", "top10"],
+									"query": [
+										{"key": "begin", "value": "2024-01-01"},
+										{"key": "end", "value": "2024-01-31"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Export Excel",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/admin/report/export",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "report", "export"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Workspace",
+					"description": "工作台 - /admin/workspace",
+					"item": [
+						{
+							"name": "Today's Business Data",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/admin/workspace/businessData",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "workspace", "businessData"]
+								}
+							}
+						},
+						{
+							"name": "Order Overview",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/admin/workspace/overviewOrders",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "workspace", "overviewOrders"]
+								}
+							}
+						},
+						{
+							"name": "Dish Overview",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/admin/workspace/overviewDishes",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "workspace", "overviewDishes"]
+								}
+							}
+						},
+						{
+							"name": "Setmeal Overview",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/admin/workspace/overviewSetmeals",
+									"host": ["{{baseUrl}}"],
+									"path": ["admin", "workspace", "overviewSetmeals"]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "User",
+			"description": "用户端接口，需要 header: authentication",
+			"auth": {
+				"type": "apikey",
+				"apikey": [
+					{
+						"key": "key",
+						"value": "authentication",
+						"type": "string"
+					},
+					{
+						"key": "value",
+						"value": "{{userToken}}",
+						"type": "string"
+					},
+					{
+						"key": "in",
+						"value": "header",
+						"type": "string"
+					}
+				]
+			},
+			"item": [
+				{
+					"name": "Auth",
+					"description": "用户认证 - /user/user",
+					"item": [
+						{
+							"name": "WeChat Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"type": "text/javascript",
+										"exec": [
+											"if (pm.response.code === 200) {",
+											"    const response = pm.response.json();",
+											"    if (response.code === 1 && response.data && response.data.token) {",
+											"        pm.collectionVariables.set('userToken', response.data.token);",
+											"        console.log('User token saved:', response.data.token);",
+											"    } else if (response.data && response.data.openid) {",
+											"        console.log('Login response:', JSON.stringify(response.data));",
+											"    }",
+											"}"
+										]
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"wx_auth_code\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/user/login",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "user", "login"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "AddressBook",
+					"description": "地址簿 - /user/addressBook",
+					"item": [
+						{
+							"name": "Address List",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/user/addressBook/list",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "addressBook", "list"]
+								}
+							}
+						},
+						{
+							"name": "Add Address",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"consignee\": \"张三\",\n    \"phone\": \"13800138000\",\n    \"sex\": \"1\",\n    \"provinceName\": \"浙江省\",\n    \"cityName\": \"杭州市\",\n    \"districtName\": \"西湖区\",\n    \"detail\": \"文三路100号\",\n    \"label\": \"公司\",\n    \"isDefault\": 0\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/addressBook",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "addressBook"]
+								}
+							}
+						},
+						{
+							"name": "Get Address by ID",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/user/addressBook/1",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "addressBook", "1"]
+								}
+							}
+						},
+						{
+							"name": "Update Address",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": 1,\n    \"consignee\": \"张三\",\n    \"phone\": \"13800138000\",\n    \"sex\": \"1\",\n    \"provinceName\": \"浙江省\",\n    \"cityName\": \"杭州市\",\n    \"districtName\": \"西湖区\",\n    \"detail\": \"文三路200号\",\n    \"label\": \"家庭\",\n    \"isDefault\": 1\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/addressBook",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "addressBook"]
+								}
+							}
+						},
+						{
+							"name": "Set Default Address",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": 1\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/addressBook/default",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "addressBook", "default"]
+								}
+							}
+						},
+						{
+							"name": "Delete Address",
+							"request": {
+								"method": "DELETE",
+								"url": {
+									"raw": "{{baseUrl}}/user/addressBook?id=1",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "addressBook"],
+									"query": [
+										{"key": "id", "value": "1"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Get Default Address",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/user/addressBook/default",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "addressBook", "default"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "ShoppingCart",
+					"description": "购物车 - /user/shoppingCart",
+					"item": [
+						{
+							"name": "Add to Cart",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"dishId\": 1,\n    \"dishFlavor\": \"微辣\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/shoppingCart/add",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "shoppingCart", "add"]
+								}
+							}
+						},
+						{
+							"name": "View Cart",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/user/shoppingCart/list",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "shoppingCart", "list"]
+								}
+							}
+						},
+						{
+							"name": "Clean Cart",
+							"request": {
+								"method": "DELETE",
+								"url": {
+									"raw": "{{baseUrl}}/user/shoppingCart/clean",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "shoppingCart", "clean"]
+								}
+							}
+						},
+						{
+							"name": "Reduce Item",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"dishId\": 1\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/shoppingCart/sub",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "shoppingCart", "sub"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Order",
+					"description": "订单管理（用户端） - /user/order",
+					"item": [
+						{
+							"name": "Submit Order",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"addressBookId\": 1,\n    \"payMethod\": 1,\n    \"remark\": \"少放辣\",\n    \"amount\": 58.00,\n    \"deliveryStatus\": 1,\n    \"tablewareNumber\": 1,\n    \"tablewareStatus\": 1,\n    \"packAmount\": 1,\n    \"estimatedDeliveryTime\": \"2024-01-15 12:00:00\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/order/submit",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "order", "submit"]
+								}
+							}
+						},
+						{
+							"name": "Order Payment",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"orderNumber\": \"202401150001\",\n    \"payMethod\": 1\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user/order/payment",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "order", "payment"]
+								}
+							}
+						},
+						{
+							"name": "History Orders",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/user/order/historyOrders?page=1&pageSize=10&status=1",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "order", "historyOrders"],
+									"query": [
+										{"key": "page", "value": "1"},
+										{"key": "pageSize", "value": "10"},
+										{"key": "status", "value": "1"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Order Detail",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/user/order/orderDetail/1",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "order", "orderDetail", "1"]
+								}
+							}
+						},
+						{
+							"name": "Cancel Order",
+							"request": {
+								"method": "PUT",
+								"url": {
+									"raw": "{{baseUrl}}/user/order/cancel/1",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "order", "cancel", "1"]
+								}
+							}
+						},
+						{
+							"name": "Reorder",
+							"request": {
+								"method": "POST",
+								"url": {
+									"raw": "{{baseUrl}}/user/order/repetition/1",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "order", "repetition", "1"]
+								}
+							}
+						},
+						{
+							"name": "Reminder",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/user/order/reminder/1",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "order", "reminder", "1"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Category",
+					"description": "分类查询（用户端） - /user/category",
+					"item": [
+						{
+							"name": "Category List",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/user/category/list?type=1",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "category", "list"],
+									"query": [
+										{"key": "type", "value": "1"}
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Dish",
+					"description": "菜品查询（用户端） - /user/dish",
+					"item": [
+						{
+							"name": "Dish List by Category",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/user/dish/list?categoryId=1",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "dish", "list"],
+									"query": [
+										{"key": "categoryId", "value": "1"}
+									]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Setmeal",
+					"description": "套餐查询（用户端） - /user/setmeal",
+					"item": [
+						{
+							"name": "Setmeal List by Category",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/user/setmeal/list?categoryId=1",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "setmeal", "list"],
+									"query": [
+										{"key": "categoryId", "value": "1"}
+									]
+								}
+							}
+						},
+						{
+							"name": "Setmeal Dishes",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/user/setmeal/dish/1",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "setmeal", "dish", "1"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Shop",
+					"description": "店铺查询（用户端） - /user/shop",
+					"item": [
+						{
+							"name": "Get Shop Status",
+							"request": {
+								"method": "GET",
+								"url": {
+									"raw": "{{baseUrl}}/user/shop/status",
+									"host": ["{{baseUrl}}"],
+									"path": ["user", "shop", "status"]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Notify",
+			"description": "支付成功回调 - /notify（微信服务器调用，无认证）",
+			"auth": {
+				"type": "noauth"
+			},
+			"item": [
+				{
+					"name": "Pay Success Callback",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"outTradeNo\": \"202401150001\",\n    \"transactionId\": \"WXPAY1234567890\",\n    \"resultCode\": \"SUCCESS\",\n    \"totalFee\": 5800\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/notify/paySuccess",
+							"host": ["{{baseUrl}}"],
+							"path": ["notify", "paySuccess"]
+						}
+					}
+				}
+			]
+		}
+	]
+}

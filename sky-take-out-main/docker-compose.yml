@@ -1,0 +1,44 @@
+# 苍穹外卖 - 集成测试共享环境
+# 使用方式: docker-compose up -d
+# 组员连接信息:
+#   MySQL: host=<组长IP>, port=3307, user=sky_test, password=sky_test_123, db=sky_take_out
+#   Redis: host=<组长IP>, port=6380, password=sky_test_123
+
+version: '3.8'
+
+services:
+  mysql-test:
+    image: mysql:8.0
+    container_name: sky-mysql-test
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: sky_take_out
+      MYSQL_USER: sky_test
+      MYSQL_PASSWORD: sky_test_123
+      TZ: Asia/Shanghai
+    volumes:
+      - ./demo/mysql.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql-test-data:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis-test:
+    image: redis:7-alpine
+    container_name: sky-redis-test
+    ports:
+      - "6380:6379"
+    command: redis-server --requirepass sky_test_123
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "sky_test_123", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql-test-data:
