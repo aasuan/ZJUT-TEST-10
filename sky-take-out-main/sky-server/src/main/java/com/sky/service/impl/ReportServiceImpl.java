@@ -54,10 +54,16 @@ public class ReportServiceImpl implements ReportService {
      */
     @Override
     public TurnoverReportVO getTurnoverReport(LocalDate begin, LocalDate end) {
+        // 处理 begin > end 的情况，交换日期顺序
+        if (begin.isAfter(end)) {
+            LocalDate temp = begin;
+            begin = end;
+            end = temp;
+        }
 
         List<LocalDate> dates = new ArrayList<>();
         dates.add(begin);
-        while (begin.equals(end)) {
+        while (!begin.equals(end)) {
             begin = begin.plusDays(1);
             dates.add(begin);
         }
