@@ -12,6 +12,10 @@ spring:
     username: sky_test
     password: sky_test_123
     type: com.alibaba.druid.pool.DruidDataSource
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:m8/data-*.sql
   data:
     redis:
       host: localhost
