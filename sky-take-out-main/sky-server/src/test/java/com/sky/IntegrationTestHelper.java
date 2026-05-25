@@ -1,8 +1,13 @@
 package com.sky;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.sky.constant.JwtClaimsConstant;
 import com.sky.dto.EmployeeLoginDTO;
+import com.sky.utils.JwtUtil;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -46,5 +51,22 @@ public class IntegrationTestHelper {
      */
     public static String adminLogin(MockMvc mockMvc) throws Exception {
         return adminLogin(mockMvc, "admin", "123456");
+    }
+
+    /**
+     * 生成 C 端用户 JWT（集成测试用，与 application-integration.yml 中 user-secret-key 一致）
+     */
+    public static String userToken(long userId) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put(JwtClaimsConstant.USER_ID, userId);
+        return JwtUtil.createJWT("itcast", 7_200_000L, claims);
+    }
+
+    /**
+     * 解析 Result JSON 的 data 节点
+     */
+    public static JSONObject parseDataJson(MvcResult result) throws Exception {
+        JSONObject json = JSON.parseObject(result.getResponse().getContentAsString());
+        return json.getJSONObject("data");
     }
 }
