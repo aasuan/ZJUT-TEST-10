@@ -8,7 +8,23 @@
       "Read(//c/Users/陈文杰/.m2/repository/com/**)",
       "Bash(mvn compile *)",
       "Bash(jar tf *)",
-      "Bash(mvn clean *)"
+      "Bash(mvn clean *)",
+      "Bash(python3 -c ' *)",
+      "Bash(where python *)",
+      "Bash(D:/anaconda3/python.exe -c ' *)",
+      "Bash(D:/anaconda3/python.exe -m pip install python-docx -q)",
+      "Read(//c/Users/陈文杰/AppData/Local/Temp/**)",
+      "Bash(D:/anaconda3/python.exe generate_m3_report.py)",
+      "Bash(git -C \"d:/1！/ZJUT-TEST-10\" log --oneline --all --grep=\"w3\\\\|m3\\\\|unitest-m3\" -20)",
+      "Bash(git -C \"d:/1！/ZJUT-TEST-10\" branch -a)",
+      "Bash(git -C \"d:/1！/ZJUT-TEST-10\" log --oneline -30)",
+      "Bash(git -C \"d:/1！/ZJUT-TEST-10\" diff --name-only origin/dev..HEAD)",
+      "Bash(git -C \"d:/1！/ZJUT-TEST-10\" log --format=\"%h %s\" --all --grep=\"m3\\\\|w3\\\\|M3\\\\|W3\" -20)",
+      "Bash(git -C \"d:/1！/ZJUT-TEST-10\" show 0b95893 --stat)",
+      "Bash(git -C \"d:/1！/ZJUT-TEST-10\" show af43308 --stat)",
+      "Bash(git -C \"d:/1！/ZJUT-TEST-10\" show fd0c593 --stat)",
+      "Bash(git -C \"d:/1！/ZJUT-TEST-10\" show 9dc4e6b --stat)",
+      "Bash(git -C \"d:/1！/ZJUT-TEST-10\" show 0b95893 --name-status)"
     ]
   }
 }
