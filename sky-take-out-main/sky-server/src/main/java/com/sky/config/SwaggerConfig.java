@@ -28,23 +28,22 @@ public class SwaggerConfig {
      *
      * @return the global open api customizer
      */
-    @Bean
-    public GlobalOpenApiCustomizer orderGlobalOpenApiCustomizer() {
-        return openApi -> {
-            if (openApi.getTags() != null) {
-                openApi.getTags().forEach(tag -> {
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("x-order", tag.getName().length());
-                    tag.setExtensions(map);
-                });
-            }
-            if (openApi.getPaths() != null) {
-                openApi.addExtension("x-test123", "333");
-                openApi.getPaths().addExtension("x-abb", "333");
-            }
-
-        };
-    }
+    // @Bean
+    // public GlobalOpenApiCustomizer orderGlobalOpenApiCustomizer() {
+    //     return openApi -> {
+    //         if (openApi.getTags() != null) {
+    //             openApi.getTags().forEach(tag -> {
+    //                 Map<String, Object> map = new HashMap<>();
+    //                 map.put("x-order", tag.getName().length());
+    //                 tag.setExtensions(map);
+    //             });
+    //         }
+    //         if (openApi.getPaths() != null) {
+    //             openApi.addExtension("x-test123", "333");
+    //             openApi.getPaths().addExtension("x-abb", "333");
+    //         }
+    //     };
+    // }
 
     @Bean
     public OpenAPI customOpenAPI() {
