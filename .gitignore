@@ -25,3 +25,7 @@ replay_pid*
 
 # Editor
 .vscode/
+
+# 压测相关
+压测相关/results
+*.jtl
