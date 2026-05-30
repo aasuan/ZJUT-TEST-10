@@ -25,7 +25,7 @@
 
         <mybatis.spring>3.0.2</mybatis.spring>
         <mybatis.test>3.0.2</mybatis.test>
-        <lombok>1.18.28</lombok>
+        <lombok>1.18.36</lombok>
         <fastjson>1.2.76</fastjson>
         <commons.lang>2.6</commons.lang>
         <druid>1.2.15</druid>

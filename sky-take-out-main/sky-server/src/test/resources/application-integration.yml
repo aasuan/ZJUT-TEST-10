@@ -8,17 +8,14 @@ server:
 spring:
   sql:
     init:
-      mode: never
+      mode: always
+      data-locations: classpath:m8/data-*.sql
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3307/sky_take_out?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
     username: sky_test
     password: sky_test_123
     type: com.alibaba.druid.pool.DruidDataSource
-  sql:
-    init:
-      mode: always
-      data-locations: classpath:m8/data-*.sql
   data:
     redis:
       host: localhost
