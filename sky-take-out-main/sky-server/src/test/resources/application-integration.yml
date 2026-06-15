@@ -1,27 +1,20 @@
-# 集成测试专用配置
-# 使用方式: @SpringBootTest + @ActiveProfiles("integration")
-# 连接 Docker Compose 启动的 MySQL + Redis（各自本地 localhost）
-
-server:
-  port: 8080
-
+# 集成测试专用配置（H2 替代 MySQL）
 spring:
   sql:
     init:
       mode: always
+      schema-locations: classpath:schema.sql
       data-locations: classpath:m8/data-*.sql
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3307/sky_take_out?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
-    username: sky_test
-    password: sky_test_123
-    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:integration;DB_CLOSE_DELAY=-1;MODE=MySQL;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
   data:
     redis:
       host: localhost
       port: 6380
       password: sky_test_123
-      timeout: 3000ms
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml

@@ -1,5 +1,5 @@
 -- H2 兼容语法 - 测试用
-SET NON_KEYWORDS VALUE;
+SET NON_KEYWORDS VALUE, USER;
 
 -- 购物车表
 CREATE TABLE IF NOT EXISTS shopping_cart (
@@ -106,3 +106,33 @@ CREATE TABLE IF NOT EXISTS order_detail (
     amount DECIMAL(10, 2)
 );
 CREATE INDEX IF NOT EXISTS idx_order_detail_order_id ON order_detail(order_id);
+
+-- 用户表（微信端）
+CREATE TABLE IF NOT EXISTS user (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    openid VARCHAR(64),
+    name VARCHAR(64),
+    phone VARCHAR(32),
+    sex VARCHAR(10),
+    id_number VARCHAR(50),
+    avatar VARCHAR(255),
+    create_time TIMESTAMP
+);
+
+-- 地址簿表
+CREATE TABLE IF NOT EXISTS address_book (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT,
+    consignee VARCHAR(64),
+    sex VARCHAR(10),
+    phone VARCHAR(32),
+    province_code VARCHAR(20),
+    province_name VARCHAR(64),
+    city_code VARCHAR(20),
+    city_name VARCHAR(64),
+    district_code VARCHAR(20),
+    district_name VARCHAR(64),
+    detail VARCHAR(255),
+    label VARCHAR(64),
+    is_default INT
+);

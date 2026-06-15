@@ -14,13 +14,12 @@ import org.springframework.test.web.servlet.MockMvc;
  * <p>
  * 启动前确保已执行: docker compose up -d
  */
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,properties = "spring.sql.init.mode=never")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @ActiveProfiles("integration")
 @org.springframework.test.context.TestPropertySource(properties = {
         "spring.profiles.active=integration",
-        "spring.profiles.include=",
-        "spring.sql.init.mode=never"
+        "spring.profiles.include="
 })
 public abstract class BaseIntegrationTest {
 
